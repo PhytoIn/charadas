@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charadas Estatísticas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f0e6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            background-image: linear-gradient(to bottom right, #f5f0e6, #edd2a4);
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .container:hover {
+            transform: translateY(-5px);
+        }
+        
+        h1 {
+            color: #e67e22;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            position: relative;
+        }
+        
+        h1::after {
+            content: '🧩';
+            font-size: 1.5rem;
+            position: absolute;
+            margin-left: 10px;
+        }
+        
+        .emoji-display {
+            font-size: 120px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.1));
+            transition: transform 0.5s ease;
+            user-select: none;
+        }
+        
+        .emoji-display.shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .phrase-container {
+            background-color: #fff9e6;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #e67e22;
+            transition: all 0.3s ease;
+        }
+        
+        .phrase-container.revealed {
+            background-color: #fffaf0;
+            border: 2px solid #e67e22;
+        }
+        
+        #phrase {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #333;
+            font-weight: 500;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        #phrase.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+            min-width: 180px;
+        }
+        
+        button:hover {
+            background-color: #d35400;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(230, 126, 34, 0.3);
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 10px rgba(189, 195, 199, 0.3);
+        }
+        
+        #show-answer {
+            background-color: #27ae60;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+        
+        #show-answer:hover {
+            background-color: #229954;
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+        
+        footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            20% { transform: rotate(-10deg) scale(1.1); }
+            40% { transform: rotate(10deg) scale(1.1); }
+            60% { transform: rotate(-5deg) scale(1.05); }
+            80% { transform: rotate(5deg) scale(1.05); }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .emoji-display {
+                font-size: 100px;
+            }
+            
+            .phrase-container {
+                min-height: 100px;
+                padding: 15px;
+            }
+            
+            #phrase {
+                font-size: 1rem;
+            }
+            
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                min-width: 200px;
+                padding: 15px 25px;
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .emoji-display {
+                font-size: 80px;
+            }
+            
+            #phrase {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Charadas Estatísticas</h1>
+        
+        <div class="emoji-display" id="emoji-display">🤔</div>
+        
+        <div class="phrase-container" id="phrase-container">
+            <p id="phrase">Clique em "Escolha uma charada" para começar!</p>
+        </div>
+        
+        <div class="button-container">
+            <button id="generate">Escolha uma charada</button>
+            <button id="show-answer">Mostrar resposta</button>
+        </div>
+    </div>
+    
+    <footer>© 2025 Rodrigo Pereira (FFCLRP/USP)</footer>
+
+    <script>
+        const emojis = ['🤔', '🧩', '🕵️', '❓', '🧠', '🔮'];
+        
+        const phrases = [
+            "Sou um requisito dos modelos lineares, você me encontra no centro da curva em forma de sino. Quem sou eu?",
+            "Seja perto ou longe da linha de melhor ajuste, eu me mantenho constante, assegurando que a dispersão não muda. Quem sou eu?",
+            "Eu apareço em todos os lugares, mas quando se trata de resíduos, você quer me ver formando uma linha reta no gráfico Q-Q. Quem sou eu?",
+            "Como uma bola de basquete bem inflada, sou igual em todas as direções. No contexto dos resíduos, quem sou eu?",
+            "Em um modelo linear, eu nunca deveria ser seu companheiro. Posso ser pequeno, posso ser grande, mas se estou lá, problemas vão surgir. Quem sou eu?",
+            "Eu sou uma suposição essencial para os mínimos quadrados ordinários. Garanto que a variância de seus resíduos seja constante. Quem sou eu?",
+            "Eu sou esperado para ser zero na regressão linear. Represento a média dos erros. Quem sou eu?",
+            "Em um gráfico Q-Q, eu sou a linha que os pontos de dados devem seguir se eles estiverem em conformidade com minhas regras. Quem sou eu?",
+            "Sou o inimigo da heterocedasticidade. Minha constância é necessária para garantir os melhores resultados em sua análise. Quem sou eu?",
+            "Seja em um teste t ou F, eu sou necessário para a validade. Sou esperado na forma de uma curva de sino quando se fala de resíduos. Quem sou eu?",
+            "Embora eu soe positivo, na estatística sou um erro indesejado. Eu ocorro quando um teste rejeita uma hipótese nula verdadeira. Quem sou eu?",
+            "Em um teste de hipótese, me consideram o erro de omissão. Estou presente quando a hipótese nula é verdadeira, mas é rejeitada. Quem sou eu?",
+            "Eu me apresento quando você aceita uma hipótese nula que deveria ter sido rejeitada. Sou um erro comum em testes estatísticos. Quem sou eu?",
+            "Sou o resultado da aceitação de uma hipótese que, na realidade, deveria ser rejeitada. Sou um erro cometido ao falhar em rejeitar a hipótese nula. Quem sou eu?",
+            "Sou aquele que leva à rejeição de algo que é verdadeiro. Cometo erros por excesso de zelo. Quem sou eu?",
+            "Eu sou um erro causado por não rejeitar uma hipótese nula falsa. Posso ser diminuído aumentando o tamanho da amostra. Quem sou eu?",
+            "Sou o erro que ocorre quando você diz não quando deveria ter dito sim. Falho em rejeitar uma hipótese nula falsa. Quem sou eu?",
+            "Na estatística, sou a lobo em pele de cordeiro. Aparência pode enganar, pois apesar de parecer correta, eu na verdade sou um erro. Quem sou eu?",
+            "Apesar do meu nome, não sou nada positivo em estatística. Apareço quando algo é rejeitado, mas na verdade é verdade. Quem sou eu?",
+            "Sou um substituto, utilizada quando temos categorias e queremos números. Na regressão, me ajuda a incluir variáveis categóricas. Quem sou eu?",
+            "Eu desdobro as categorias em números, transformando-as em binárias. Com n categorias, tenho n-1 presenças. Quem sou eu?",
+            "Posso ser zero ou um, mas nunca dois. Facilito a inclusão de variáveis categóricas em modelos de regressão. Quem sou eu?",
+            "Transformo categorias em números e ajudo a representar uma característica qualitativa em uma regressão. Sou um tipo especial de variável. Quem sou eu?",
+            "Seja na regressão linear ou logística, sou útil para lidar com variáveis que não são contínuas. Nasci do binário e existo em n-1 quantidade. Quem sou eu?",
+            "Posso ser muitas, mas sempre uma a menos do que as categorias originais. Ajudando a decodificar o categórico, sou útil na análise. Quem sou eu?",
+            "Posso ser associada a várias categorias, mas sempre serei 0 ou 1. Ajudo a converter o qualitativo em quantitativo. Quem sou eu?",
+            "No mundo das estatísticas, eu permito que as variáveis categóricas falem a linguagem dos números. Em n categorias, existo em n-1. Quem sou eu?",
+            "Nunca sou mais do que um, nunca menos do que zero. Existem n-1 de mim para n categorias. Sou um tipo de variável. Quem sou eu?",
+            "Na análise de regressão, dou voz a fatores qualitativos. Sempre me expresso em 0s e 1s e sou criado em número de n-1 para n categorias. Quem sou eu?",
+            "Sou um limite que decide se uma descoberta é digna de atenção. Padrão em muitos campos, porém minha universalidade é contestada. Quem sou eu?",
+            "Quando os p-valores me desafiam, é hora de rejeitar a hipótese nula. Entretanto, muitos alegam que eu sou muito indulgente. Quem sou eu?",
+            "Na análise estatística, sou o guardião da significância. Mas muitos acreditam que meu valor deveria ser menor. Quem sou eu?",
+            "Seja na medicina ou na psicologia, sou o limiar usado para determinar se um resultado é estatisticamente significativo, mas algumas vozes discordam. Quem sou eu?",
+            "Muitos pesquisadores me usam como um padrão para julgar a relevância de um resultado. Porém, nem todos concordam com meu valor. Quem sou eu?",
+            "Apesar de ser uma convenção em muitos campos de pesquisa, minhas credenciais são frequentemente questionadas por críticos. Quem sou eu?",
+            "Sou o padrão-ouro para avaliar a significância estatística, mas alguns argumentam que eu sou muito generoso. Quem sou eu?",
+            "Eu estabeleço a fronteira entre o significativo e o insignificante. Contudo, minha capacidade de distinguir verdade de erro é muitas vezes criticada. Quem sou eu?",
+            "Uso o valor 0.05 para separar o trigo do joio. No entanto, alguns me criticam por não ser rigoroso o suficiente. Quem sou eu?",
+            "Eu sou o padrão universalmente aceito para determinar se uma diferença é significativa. Porém, muitos alegam que eu deixo passar muitos falsos positivos. Quem sou eu?",
+            "Eu forneço uma medida da qualidade do ajuste de um modelo estatístico. Mesmo se eu não for alto, ainda posso ser útil. Quem sou eu?",
+            "Sou uma métrica usada para avaliar a adequação do modelo. Minha definição pode enganar, pois às vezes um valor baixo para mim ainda pode ter significado. Quem sou eu?",
+            "Represento a proporção da variância explicada pelo modelo, mas mesmo quando sou baixo, isso não necessariamente indica um mau ajuste. Quem sou eu?",
+            "Quando falo de um bom ajuste, muitos pensam em mim próximo a um. Mas às vezes, mesmo quando sou baixo, posso indicar um modelo significativo. Quem sou eu?",
+            "Eu indico o ajuste do modelo. Tenho um critério irmão que penaliza a complexidade do modelo. Quem sou eu e quem é meu irmão?",
+            "Mesmo que eu não capture tudo, posso ser uma medida de adequação. Um baixo valor para mim não descarta um modelo significativo. Quem sou eu?",
+            "Sou uma medida que ajuda a entender quanto do resultado pode ser explicado pelo modelo. No entanto, mesmo que eu seja pequeno, isso não significa que o modelo seja insignificante. Quem sou eu?",
+            "Na modelagem estatística, sou uma ferramenta útil para a seleção de modelos. Eu equilibro o ajuste e a complexidade do modelo. Quem sou eu?",
+            "Eu sou uma medida de quão bem o modelo de regressão se ajusta aos dados. Contudo, mesmo que seja pequeno, isso não descarta a possibilidade de um modelo significativo. Quem sou eu?",
+            "Eu sou uma ferramenta útil para avaliar a qualidade do ajuste do modelo, mas a minha versão ajustada leva em consideração a complexidade do modelo. Quem sou eu e qual é minha versão ajustada?",
+            "Sou usado quando você está interessado em mudanças em apenas uma direção. Seja maior ou menor, mas nunca os dois. Quem sou eu?",
+            "Eu sou a opção quando você precisa saber se um valor é significativamente maior ou menor do que outro. Não importa a direção, eu estou lá. Quem sou eu?",
+            "Seja para a esquerda ou para a direita, estou lá quando você se preocupa apenas com uma dessas direções. Quem sou eu?",
+            "Eu me encaixo quando você está procurando por diferenças, independentemente da direção. Não importa se é para mais ou para menos. Quem sou eu?",
+            "No mundo dos testes de hipóteses, sou escolhido quando a pesquisa está interessada apenas em saber se um valor é maior do que o outro. Quem sou eu?",
+            "Na estatística, eu verifico a hipótese nula para ambas as direções. Posso encontrar diferenças significativas, independentemente de serem positivas ou negativas. Quem sou eu?",
+            "Quando a hipótese alternativa é apenas de uma direção, eu sou a escolha correta. Quem sou eu?",
+            "Minha essência é dualidade. Estou lá para os testes que não se importam com a direção da diferença. Quem sou eu?",
+            "Na análise estatística, eu sou a escolha quando a preocupação é se a mudança é maior ou menor, mas não especificamente qual. Quem sou eu?",
+            "Quando a hipótese alternativa tem uma direção especificada, eu sou a melhor opção para fazer o teste. Quem sou eu?",
+            "Eu sou uma transformação que muitas vezes é aplicada para homogeneizar o desvio padrão. Apenas números positivos podem passar por mim. Quem sou eu?",
+            "Utilizada para estabilizar a variação em dados de contagem, eu posso te dar uma visão diferente sobre os seus dados. Quem sou eu?",
+            "Eu sou usada quando se quer condensar variações amplas. Meu trabalho é muito apreciado em modelos estatísticos. Quem sou eu?",
+            "Comumente aplicada em porcentagens e proporções, eu ajudo a normalizar a distribuição de seus dados. Quem sou eu?",
+            "Eu sou uma transformação que pode ser aplicada quando os dados seguem uma distribuição binomial. Me ajuda a lidar com percentuais e proporções. Quem sou eu?",
+            "Meu nome pode lembrar trigonometria, mas minha aplicação é bem diferente. Quando se tem dados proporcionais, posso ajudar. Quem sou eu?",
+            "Posso diminuir o peso dos outliers e trazer uma distribuição mais próxima ao normal. Sou uma transformação em modelos lineares. Quem sou eu?",
+            "Em modelos lineares, sou uma transformação que ajuda a estabilizar a variância em dados contados. Quem sou eu?",
+            "Aplico-me a dados proporcionais, especificamente para transformar a distribuição de proporções e torná-la mais simétrica. Quem sou eu?",
+            "Quando aplicado, transformo uma ampla gama de valores em uma escala mais administrável. Sou uma operação matemática. Quem sou eu?",
+            "Em um modelo de regressão linear, sou o valor de Y quando X é igual a zero. Sem mim, o modelo não tem onde começar. Quem sou eu?",
+            "Eu sou a inclinação da linha em um gráfico de regressão linear. Meu valor determina o quão rápido Y muda quando X muda. Quem sou eu?",
+            "Na equação de uma linha, sou o valor que aparece sozinho. Não importa o valor de X, estou sempre lá. Quem sou eu?",
+            "Eu mudo dependendo de quão íngreme é a relação entre X e Y. Sem mim, o modelo de regressão linear não teria direção. Quem sou eu?",
+            "Sempre que X aumenta em uma unidade, eu digo quanto Y aumenta. Sem mim, você não sabe o efeito de X sobre Y. Quem sou eu?",
+            "Eu sou o ponto de partida da linha em um gráfico de regressão linear. Mesmo quando X é zero, estou lá. Quem sou eu?",
+            "Na equação da regressão linear, eu represento o impacto da mudança em X sobre Y. Sem mim, o modelo seria apenas uma constante. Quem sou eu?",
+            "Eu sou a diferença que uma unidade de X faz em Y. Sou uma medida de quão rápido Y muda. Quem sou eu?",
+            "Em um modelo linear, sou onde a linha cruza o eixo Y. Estou lá, não importa o valor de X. Quem sou eu?",
+            "Eu sou um componente chave na equação da regressão linear que permite estimar Y com base em X. Quem sou eu?",
+            "Eu sou a quantidade de valores independentes em seus dados que você pode usar para estimar parâmetros. Quem sou eu?",
+            "Na estatística, sou frequentemente usado para calcular p-valores em testes de hipóteses. Quem sou eu?",
+            "Mesmo que o tamanho do seu conjunto de dados seja grande, eu posso ser menor, pois represento a quantidade de informação livre disponível. Quem sou eu?",
+            "Sou uma medida de quantos valores em seu conjunto de dados podem variar independentemente. Quem sou eu?",
+            "Quando você está realizando um teste t ou ANOVA, você precisará de mim para fazer seus cálculos corretamente. Quem sou eu?",
+            "Represento a quantidade de liberdade que seus dados têm para variar ao estimar parâmetros estatísticos. Quem sou eu?",
+            "Eu refiro-me ao número de valores em um cálculo final que são livres para variar. Quem sou eu?",
+            "Sem mim, você não poderia calcular corretamente p-valores ou intervalos de confiança em muitos testes estatísticos. Quem sou eu?",
+            "Se você conhece a soma dos seus dados e a maioria dos valores individuais, eu represento o número de valores que ainda podem ser livremente escolhidos. Quem sou eu?",
+            "Eu sou usado quando suas variáveis independentes são todas categóricas. Comigo, você pode analisar as diferenças entre vários grupos. Quem sou eu?",
+            "Se as suas variáveis independentes são uma mistura de categóricas e contínuas, eu sou a técnica que você precisa. Quem sou eu?",
+            "Comigo, você pode prever um valor de uma variável dependente com base em várias variáveis independentes contínuas. Quem sou eu?",
+            "Eu sou um teste que compara a variação dentro de grupos com a variação entre grupos. Suas variáveis independentes devem ser categóricas. Quem sou eu?",
+            "Eu sou um modelo que considera tanto variáveis independentes categóricas quanto contínuas. Quem sou eu?",
+            "Eu analiso a relação entre uma variável dependente contínua e uma ou mais variáveis independentes contínuas. Quem sou eu?",
+            "Utilizado para comparar as médias de três ou mais grupos independentes, eu sou a escolha quando suas variáveis independentes são categóricas. Quem sou eu?",
+            "Eu sou uma técnica estatística que permite ajustar (ou controlar) os efeitos de variáveis independentes contínuas ao avaliar o efeito de variáveis categóricas. Quem sou eu?",
+            "Em um modelo linear, sou a técnica que você usa quando todas as suas variáveis independentes são contínuas. Quem sou eu?",
+            "Eu sou um modelo estatístico que considera o impacto de variáveis independentes tanto categóricas quanto contínuas sobre a variável dependente. Quem sou eu?"
+        ];
+
+        const answers = [
+            "Distribuição normal dos resíduos",
+            "Homocedasticidade",
+            "Normalidade",
+            "Homogeneidade da variância",
+            "Heterocedasticidade",
+            "Homoscedasticidade",
+            "Expectativa dos resíduos",
+            "Normalidade dos resíduos",
+            "Homoscedasticidade",
+            "Distribuição normal dos resíduos",
+            "Erro do Tipo I",
+            "Erro do Tipo I",
+            "Erro do Tipo II",
+            "Erro do Tipo II",
+            "Erro do Tipo I",
+            "Erro do Tipo II",
+            "Erro do Tipo II",
+            "Erro do Tipo II",
+            "Erro do Tipo I",
+            "Variável Dummy",
+            "Variável Dummy",
+            "Variável Dummy",
+            "Variável Dummy",
+            "Variável Dummy",
+            "Variável Dummy",
+            "Variável Dummy",
+            "Variável Dummy",
+            "Variável Dummy",
+            "Variável Dummy",
+            "Nível de significância de 0.05",
+            "Nível de significância de 0.05",
+            "Nível de significância de 0.05",
+            "Nível de significância de 0.05",
+            "Nível de significância de 0.05",
+            "Nível de significância de 0.05",
+            "Nível de significância de 0.05",
+            "Nível de significância de 0.05",
+            "Nível de significância de 0.05",
+            "Nível de significância de 0.05",
+            "R quadrado",
+            "R quadrado",
+            "R quadrado",
+            "R quadrado",
+            "R quadrado, AIC",
+            "R quadrado",
+            "R quadrado",
+            "AIC (Critério de Informação de Akaike)",
+            "R quadrado",
+            "R quadrado, R quadrado ajustado",
+            "Teste de hipótese unicaudal",
+            "Teste de hipótese bicaudal",
+            "Teste de hipótese unicaudal",
+            "Teste de hipótese bicaudal",
+            "Teste de hipótese unicaudal",
+            "Teste de hipótese bicaudal",
+            "Teste de hipótese unicaudal",
+            "Teste de hipótese bicaudal",
+            "Teste de hipótese bicaudal",
+            "Teste de hipótese unicaudal",
+            "Transformação de raiz quadrada",
+            "Transformação de raiz quadrada",
+            "Transformação logarítmica",
+            "Transformação de arcosseno da raiz quadrada",
+            "Transformação de arcosseno da raiz quadrada",
+            "Transformação de arcosseno da raiz quadrada",
+            "Transformação logarítmica",
+            "Transformação de raiz quadrada",
+            "Transformação de arcosseno da raiz quadrada",
+            "Transformação logarítmica",
+            "Intercepto (a)",
+            "Coeficiente angular (b)",
+            "Intercepto (a)",
+            "Coeficiente angular (b)",
+            "Coeficiente angular (b)",
+            "Intercepto (a)",
+            "Coeficiente angular (b)",
+            "Coeficiente angular (b)",
+            "Intercepto (a)",
+            "Coeficiente angular (b)",
+            "Graus de liberdade",
+            "Graus de liberdade",
+            "Graus de liberdade",
+            "Graus de liberdade",
+            "Graus de liberdade",
+            "Graus de liberdade",
+            "Graus de liberdade",
+            "Graus de liberdade",
+            "Graus de liberdade",
+            "ANOVA",
+            "ANCOVA",
+            "Regressão linear",
+            "ANOVA",
+            "ANCOVA",
+            "Regressão linear",
+            "ANOVA",
+            "ANCOVA",
+            "Regressão linear",
+            "ANCOVA"
+        ];
+
+        const generateBtn = document.getElementById("generate");
+        const showAnswerBtn = document.getElementById("show-answer");
+        const phraseElem = document.getElementById("phrase");
+        const emojiDisplay = document.getElementById("emoji-display");
+        const phraseContainer = document.getElementById("phrase-container");
+        
+        let currentPhraseIndex = -1;
+        let isShowingAnswer = false;
+
+        function getRandomEmoji() {
+            return emojis[Math.floor(Math.random() * emojis.length)];
+        }
+
+        generateBtn.addEventListener("click", () => {
+            // Desabilitar botões durante a animação
+            generateBtn.disabled = true;
+            showAnswerBtn.disabled = true;
+            
+            // Resetar estado
+            isShowingAnswer = false;
+            phraseContainer.classList.remove("revealed");
+            
+            // Selecionar nova charada e emoji
+            currentPhraseIndex = Math.floor(Math.random() * phrases.length);
+            const newEmoji = getRandomEmoji();
+            
+            // Animar emoji
+            emojiDisplay.classList.add("shake");
+            
+            setTimeout(() => {
+                // Atualizar emoji e frase
+                emojiDisplay.textContent = newEmoji;
+                emojiDisplay.classList.remove("shake");
+                
+                // Mostrar charada
+                phraseElem.textContent = phrases[currentPhraseIndex];
+                phraseContainer.classList.add("revealed");
+                
+                // Reabilitar botões
+                generateBtn.disabled = false;
+                showAnswerBtn.disabled = false;
+            }, 500);
+        });
+
+        showAnswerBtn.addEventListener("click", () => {
+            if (currentPhraseIndex === -1) {
+                return; // Nenhuma charada selecionada ainda
+            }
+            
+            // Desabilitar botão durante a animação
+            showAnswerBtn.disabled = true;
+            
+            if (!isShowingAnswer) {
+                // Animar emoji antes de mostrar resposta
+                emojiDisplay.classList.add("shake");
+                
+                setTimeout(() => {
+                    // Mostrar resposta
+                    phraseElem.textContent = `Resposta: ${answers[currentPhraseIndex]}`;
+                    emojiDisplay.classList.remove("shake");
+                    isShowingAnswer = true;
+                    showAnswerBtn.disabled = false;
+                    showAnswerBtn.textContent = "Ver charada";
+                }, 500);
+            } else {
+                // Voltar para a charada
+                phraseElem.textContent = phrases[currentPhraseIndex];
+                isShowingAnswer = false;
+                showAnswerBtn.disabled = false;
+                showAnswerBtn.textContent = "Mostrar resposta";
+            }
+        });
+    </script>
+</body>
+</html>
